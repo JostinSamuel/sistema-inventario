@@ -1,73 +1,140 @@
-import java.util.Arrays;
 import java.util.Scanner;
 
-
 public class Main {
+    private static String[] arrayProductos = {"Leche", "Atún", "Fideos", "Azúcar", "Galletas"};
+    private static int[] arrayProductosCantidad = {100, 180, 84, 98, 150};
+    private static int[] cantidadOriginal = {100, 180, 84, 98, 150};
+
     public static void main(String[] args) {
-        //Definicion de variables
-        int cantidad;
-        int opcionAdicional;
-        boolean decision;
-        int producto;
-        String productoEliminar;
+        imprimeTitulo();
 
-        Scanner scannerProducto = new Scanner(System.in);
-        Scanner scannerCantidad = new Scanner(System.in);
-        Scanner scannerDecision = new Scanner(System.in);
-        Scanner scannerOpcionAdicional = new Scanner(System.in);
-        Scanner scannerProductoEliminar = new Scanner(System.in);
+        Scanner scanner = new Scanner(System.in);
 
-        String[] arrayProductos = {"Leche","Atún","Fideos","Azúcar","Galletas"};
-        int[] arrayProductosCantidad = {100,180,84,98,150};
-        System.out.println("Bienvenido al Inventario de la tienda 'Los Cedros' ");
+        mostrarListaDeProductos(); //1. Muestra de lista de productos
+
         do {
-            System.out.println("Lista de productos (Seleccione un número)");
-            for (int i = 0; i < arrayProductos.length; i++) {
-                System.out.println(i+1 + ". "+arrayProductos[i]);
-            }
-            System.out.println("Ingrese el producto a registrar");
-            producto = scannerProducto.nextInt(); //validar que sea entero
-            System.out.println("Ingrese cantidad a registrar");
-            cantidad = scannerCantidad.nextInt();
-            arrayProductosCantidad[producto-1] = arrayProductosCantidad[producto-1] - cantidad;
-            System.out.println("Se registró " + cantidad + " unidades del producto " + producto);
-            System.out.println("Desea registrar más productos? SI - NO");
-            String nuevaDecision = scannerDecision.nextLine();
-            if (nuevaDecision.equalsIgnoreCase("SI")){
-                decision = true;
-            }else {
-                decision = false;
-            }
-        }
-        while (decision);
+            registrarProductoVendido(); //2. Seleccionar producto para registrar
+        } while (continuarRegistro());
 
-
-        System.out.println("1. Guardar productos y finalizar");
-        System.out.println("2. Eliminar producto");
-        opcionAdicional = scannerOpcionAdicional.nextInt();
-
-        switch (opcionAdicional){
-            case 1 :
-                System.out.println("Se actualizó el inventario exitosamente.");
-                mostrarListaDeProductos(arrayProductos, arrayProductosCantidad);
-                break;
-            case 2 :
-                System.out.println("Ingrese el producto a eliminar");
-                productoEliminar = scannerProductoEliminar.nextLine();
-                System.out.println("El producto " + productoEliminar + " ha sido eliminado.");
-                mostrarListaDeProductos(arrayProductos, arrayProductosCantidad);
-                break;
-            default:
-                System.out.println("Opción incorrecta. Ingrese opción válida");
-        }
+        int opcionAdicional = seleccionarOpcionAdicional(scanner);
+        procesarOpcionAdicional(opcionAdicional, scanner);
 
         System.out.println("Se cierra sesión del sistema.");
     }
 
-    private static void mostrarListaDeProductos(String[] arrayProductos, int[] arrayProductosCantidad) {
+    private static void mostrarListaDeProductos() {
         System.out.println("Detalle de Inventario");
         for (int i = 0; i < arrayProductos.length; i++) {
             System.out.println("Producto: " + arrayProductos[i] + " - Cantidad: " + arrayProductosCantidad[i] + " unidades");
         }
+    }
+
+    private static void registrarProductoVendido() {
+        Scanner scanner = new Scanner(System.in);
+
+        while (true) {
+            System.out.println("Lista de productos (Seleccione un número)");
+            for (int i = 0; i < arrayProductos.length; i++) {
+                System.out.println(i + 1 + ". " + arrayProductos[i]);
+            }
+
+            System.out.println("Ingrese el producto a registrar");
+            int producto = scanner.nextInt();
+
+            if (producto < 1 || producto > arrayProductos.length) {
+                System.out.println("Producto no válido. Ingrese un número válido.");
+            } else {
+                // El número de producto es válido, continuar con la entrada de la cantidad.
+                System.out.println("Ingrese cantidad a registrar");
+                int cantidad = scanner.nextInt();
+
+                if (cantidad > arrayProductosCantidad[producto - 1]) {
+                    System.out.println("No hay suficientes unidades disponibles de " + arrayProductos[producto - 1]);
+                } else {
+                    // Registro exitoso.
+                    arrayProductosCantidad[producto - 1] -= cantidad;
+                    System.out.println("Se registró " + cantidad + " unidades del producto " + arrayProductos[producto - 1]);
+                    break; // Salir del bucle una vez que se haya realizado el registro exitoso.
+                }
+            }
+        }
+    }
+
+
+    private static boolean continuarRegistro() {
+        Scanner scanner = new Scanner(System.in);
+        System.out.println("¿Desea registrar más productos? SI - NO");
+        String nuevaDecision = scanner.nextLine();
+        return nuevaDecision.equalsIgnoreCase("SI");
+    }
+
+    private static int seleccionarOpcionAdicional(Scanner scanner) {
+        System.out.println("1. Guardar registro y finalizar");
+        System.out.println("2. Eliminar producto");
+        return scanner.nextInt();
+    }
+
+    private static void procesarOpcionAdicional(int opcionAdicional, Scanner scanner) {
+
+        switch (opcionAdicional) {
+            case 1:
+                System.out.println("Se actualizó el inventario exitosamente.");
+                mostrarListaDeProductos();
+                break;
+            case 2:
+                System.out.println("Ingrese el producto a eliminar (Número de producto)");
+                int productoEliminar = scanner.nextInt();
+                eliminarProducto(productoEliminar);
+                mostrarListaDeProductos();
+                break;
+            default:
+                System.out.println("Error. Ingrese opción válida");
+
+        }
+
+    }
+
+    private static void eliminarProducto(int productoEliminar) {
+        if (productoEliminar >= 1 && productoEliminar <= arrayProductos.length) {
+            arrayProductosCantidad[productoEliminar - 1] = cantidadOriginal[productoEliminar - 1];
+            System.out.println("El producto " + arrayProductos[productoEliminar - 1] + " ha sido eliminado del registro.");
+        } else {
+            System.out.println("Producto no válido");
+        }
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    private static void imprimeTitulo() {
+        String asciiArt =
+                "  _______  _                   _          _                    _____           _                  \n" +
+                        " |__   __|(_)                 | |        | |                  / ____|         | |                 \n" +
+                        "    | |    _   ___  _ __    __| |  __ _  | |      ___   ___  | |      ___   __| | _ __  ___   ___ \n" +
+                        "    | |   | | / _ \\| '_ \\  / _` | / _` | | |     / _ \\ / __| | |     / _ \\ / _` || '__|/ _ \\ / __|\n" +
+                        "    | |   | ||  __/| | | || (_| || (_| | | |____| (_) |\\__ \\ | |____|  __/| (_| || |  | (_) |\\__ \\\n" +
+                        "    |_|   |_| \\___||_| |_| \\__,_| \\__,_| |______|\\___/ |___/  \\_____|\\___| \\__,_||_|   \\___/ |___/\n";
+
+        System.out.println(asciiArt);
+        //https://patorjk.com/software/taag/#p=display&f=Graffiti&t=Tienda%20Los%20Cedros
     }
 }
